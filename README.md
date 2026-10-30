@@ -22,7 +22,7 @@ A production-ready, cross-platform health, strength, precision nutrition, and au
 5. [Product Tour & Feature Architecture](#5-product-tour--feature-architecture)
 6. [Database Schema & Row-Level Security (RLS)](#6-database-schema--row-level-security-rls)
 7. [Project Structure](#7-project-structure)
-8. [Deployment (Netlify)](#8-deployment-netlify)
+8. [Deployment (Netlify)](#8-deployment-netlify) 
 
 ---
 
