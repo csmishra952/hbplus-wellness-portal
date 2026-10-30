@@ -1,0 +1,356 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reusable Hardened Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isBootstrappedAdmin() {
+      return isVerifiedUser() && request.auth.token.email == 'csmishra952@gmail.com';
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        isBootstrappedAdmin() ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Validation Blueprint: Profile (Owner-bound)
+    function isValidProfile(data) {
+      return data.keys().hasAll([
+          'uid',
+          'email',
+          'fullName',
+          'avatarUrl',
+          'role',
+          'assignedProgram',
+          'domainVerified',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid',
+          'email',
+          'fullName',
+          'avatarUrl',
+          'role',
+          'assignedProgram',
+          'domainVerified',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.uid is string
+        && data.uid.size() >= 1
+        && data.uid.size() <= 128
+        && data.uid.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.uid == request.auth.uid
+        && data.email is string
+        && data.email.size() >= 3
+        && data.email.size() <= 254
+        && data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && data.fullName is string
+        && data.fullName.size() >= 1
+        && data.fullName.size() <= 100
+        && data.avatarUrl is string
+        && data.avatarUrl.size() <= 500
+        && data.role is string
+        && data.role.size() <= 16
+        && (data.role == 'user' || data.role == 'admin')
+        && data.assignedProgram is string
+        && data.assignedProgram.size() >= 1
+        && data.assignedProgram.size() <= 120
+        && data.domainVerified is bool
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: Profile Target (Supports Owner & Admin Program Assignment)
+    function isValidProfileTarget(data, targetUid) {
+      return data.keys().hasAll([
+          'uid',
+          'email',
+          'fullName',
+          'avatarUrl',
+          'role',
+          'assignedProgram',
+          'domainVerified',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid',
+          'email',
+          'fullName',
+          'avatarUrl',
+          'role',
+          'assignedProgram',
+          'domainVerified',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.uid is string
+        && data.uid.size() >= 1
+        && data.uid.size() <= 128
+        && data.uid.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.uid == targetUid
+        && data.email is string
+        && data.email.size() >= 3
+        && data.email.size() <= 254
+        && data.email.matches('^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$')
+        && data.fullName is string
+        && data.fullName.size() >= 1
+        && data.fullName.size() <= 100
+        && data.avatarUrl is string
+        && data.avatarUrl.size() <= 500
+        && data.role is string
+        && data.role.size() <= 16
+        && (data.role == 'user' || data.role == 'admin')
+        && data.assignedProgram is string
+        && data.assignedProgram.size() >= 1
+        && data.assignedProgram.size() <= 120
+        && data.domainVerified is bool
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: WellnessLog
+    function isValidWellnessLog(data) {
+      return data.keys().hasAll([
+          'ownerId',
+          'workoutCompleted',
+          'completedExercisesCount',
+          'workoutStreak',
+          'caloriesConsumed',
+          'proteinGrams',
+          'carbsGrams',
+          'fatsGrams',
+          'waterGlasses',
+          'stepsCount',
+          'mindfulnessStreak',
+          'breathworkSessions',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId',
+          'workoutCompleted',
+          'completedExercisesCount',
+          'workoutStreak',
+          'caloriesConsumed',
+          'proteinGrams',
+          'carbsGrams',
+          'fatsGrams',
+          'waterGlasses',
+          'stepsCount',
+          'mindfulnessStreak',
+          'breathworkSessions',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.ownerId is string
+        && data.ownerId.size() >= 1
+        && data.ownerId.size() <= 128
+        && data.ownerId.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.ownerId == request.auth.uid
+        && data.workoutCompleted is bool
+        && data.completedExercisesCount is number
+        && data.completedExercisesCount >= 0
+        && data.completedExercisesCount <= 20
+        && data.workoutStreak is number
+        && data.workoutStreak >= 0
+        && data.workoutStreak <= 3650
+        && data.caloriesConsumed is number
+        && data.caloriesConsumed >= 0
+        && data.caloriesConsumed <= 20000
+        && data.proteinGrams is number
+        && data.proteinGrams >= 0
+        && data.proteinGrams <= 1000
+        && data.carbsGrams is number
+        && data.carbsGrams >= 0
+        && data.carbsGrams <= 2000
+        && data.fatsGrams is number
+        && data.fatsGrams >= 0
+        && data.fatsGrams <= 1000
+        && data.waterGlasses is number
+        && data.waterGlasses >= 0
+        && data.waterGlasses <= 40
+        && data.stepsCount is number
+        && data.stepsCount >= 0
+        && data.stepsCount <= 200000
+        && data.mindfulnessStreak is number
+        && data.mindfulnessStreak >= 0
+        && data.mindfulnessStreak <= 3650
+        && data.breathworkSessions is number
+        && data.breathworkSessions >= 0
+        && data.breathworkSessions <= 1000
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    // Validation Blueprint: DomainSetting
+    function isValidDomainSetting(data) {
+      return data.keys().hasAll([
+          'updatedByUid',
+          'allowedDomains',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'updatedByUid',
+          'allowedDomains',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.updatedByUid is string
+        && data.updatedByUid.size() >= 1
+        && data.updatedByUid.size() <= 128
+        && data.updatedByUid.matches('^[a-zA-Z0-9_\\-]+$')
+        && data.updatedByUid == request.auth.uid
+        && data.allowedDomains is list
+        && data.allowedDomains.size() >= 1
+        && data.allowedDomains.size() <= 10
+        && data.allowedDomains[0] is string
+        && data.allowedDomains[0].size() >= 3
+        && data.allowedDomains[0].size() <= 100
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    // Collection: /admins/{adminId}
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && isValidId(adminId) && (adminId == request.auth.uid || isAdmin());
+      allow list, create, update, delete: if false;
+    }
+
+    // Collection: /profiles/{userId}
+    match /profiles/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && (userId == request.auth.uid || isAdmin());
+      allow list: if isSignedIn() && (
+        existing().uid == request.auth.uid ||
+        isBootstrappedAdmin()
+      );
+      allow create: if isVerifiedUser()
+        && isValidId(userId)
+        && userId == request.auth.uid
+        && isValidProfile(incoming())
+        && incoming().email == request.auth.token.email
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && (incoming().role == 'user' || (incoming().role == 'admin' && isAdmin()));
+      allow update: if isSignedIn()
+        && isValidProfileTarget(incoming(), userId)
+        && isVerifiedUser()
+        && isValidId(userId)
+        && incoming().uid == existing().uid
+        && incoming().email == existing().email
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          (
+            userId == request.auth.uid
+            && isValidProfile(incoming())
+            && incoming().role == existing().role
+            && incoming().domainVerified == existing().domainVerified
+            && incoming().diff(existing()).affectedKeys().hasOnly(['fullName', 'avatarUrl', 'assignedProgram', 'updatedAt'])
+          )
+          || (
+            incoming().diff(existing()).affectedKeys().hasOnly(['assignedProgram', 'role', 'domainVerified', 'updatedAt'])
+            && isAdmin()
+          )
+        );
+      allow delete: if false;
+    }
+
+    // Collection: /wellnessLogs/{logId}
+    match /wellnessLogs/{logId} {
+      allow get: if isSignedIn() && isValidId(logId) && (logId == request.auth.uid || isAdmin());
+      allow list: if false;
+      allow create: if isVerifiedUser()
+        && isValidId(logId)
+        && logId == request.auth.uid
+        && isValidWellnessLog(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && exists(/databases/$(database)/documents/profiles/$(request.auth.uid));
+      allow update: if isSignedIn()
+        && isValidWellnessLog(incoming())
+        && isVerifiedUser()
+        && isValidId(logId)
+        && logId == request.auth.uid
+        && incoming().ownerId == existing().ownerId
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['workoutCompleted', 'completedExercisesCount', 'workoutStreak', 'updatedAt'])
+          || incoming().diff(existing()).affectedKeys().hasOnly(['caloriesConsumed', 'proteinGrams', 'carbsGrams', 'fatsGrams', 'waterGlasses', 'updatedAt'])
+          || incoming().diff(existing()).affectedKeys().hasOnly(['mindfulnessStreak', 'breathworkSessions', 'updatedAt'])
+          || incoming().diff(existing()).affectedKeys().hasOnly(['stepsCount', 'waterGlasses', 'updatedAt'])
+          || (
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'workoutCompleted',
+              'completedExercisesCount',
+              'workoutStreak',
+              'caloriesConsumed',
+              'proteinGrams',
+              'carbsGrams',
+              'fatsGrams',
+              'waterGlasses',
+              'stepsCount',
+              'mindfulnessStreak',
+              'breathworkSessions',
+              'updatedAt'
+            ])
+            && isAdmin()
+          )
+        );
+      allow delete: if false;
+    }
+
+    // Collection: /domainSettings/{settingId}
+    match /domainSettings/{settingId} {
+      allow get: if isVerifiedUser() && isValidId(settingId);
+      allow list: if false;
+      allow create: if isVerifiedUser()
+        && isValidId(settingId)
+        && settingId == 'global'
+        && isValidDomainSetting(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && isAdmin();
+      allow update: if isSignedIn()
+        && isValidDomainSetting(incoming())
+        && isVerifiedUser()
+        && isValidId(settingId)
+        && settingId == 'global'
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['updatedByUid', 'allowedDomains', 'updatedAt'])
+        && isAdmin();
+      allow delete: if false;
+    }
+  }
+}

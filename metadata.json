@@ -1,0 +1,6 @@
+{
+  "name": "HB+ | Holistic Strength, Nutrition & Wellness",
+  "description": "Cross-platform health, fitness, smart nutrition, and mental wellness platform exclusively for verified @hbplus.fit members and coaches.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

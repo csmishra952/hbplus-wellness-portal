@@ -1,0 +1,225 @@
+{
+  "entities": {
+    "Profile": {
+      "title": "Profile",
+      "description": "Authenticated HB+ member or admin profile linked to Auth UID.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Auth user UID matching document ID."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 254,
+          "minLength": 3,
+          "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+          "description": "Verified corporate domain email address."
+        },
+        "fullName": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1,
+          "description": "Full display name of the member or coach."
+        },
+        "avatarUrl": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Avatar URL from OAuth provider or studio profile."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["user", "admin"],
+          "maxLength": 16,
+          "description": "Role-based access tier."
+        },
+        "assignedProgram": {
+          "type": "string",
+          "maxLength": 120,
+          "minLength": 1,
+          "description": "Assigned strength and wellness training program."
+        },
+        "domainVerified": {
+          "type": "boolean",
+          "description": "Whether email matched allowed HB+ domain whitelist."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of profile creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last profile update."
+        }
+      },
+      "required": [
+        "uid",
+        "email",
+        "fullName",
+        "avatarUrl",
+        "role",
+        "assignedProgram",
+        "domainVerified",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "WellnessLog": {
+      "title": "WellnessLog",
+      "description": "Daily holistic wellness telemetry across strength, nutrition, mindfulness, and vitals.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "UID of the profile owning this wellness log."
+        },
+        "workoutCompleted": {
+          "type": "boolean",
+          "description": "Whether today's strength split is marked complete."
+        },
+        "completedExercisesCount": {
+          "type": "number",
+          "description": "Count of completed exercises in today's split (0 to 10)."
+        },
+        "workoutStreak": {
+          "type": "number",
+          "description": "Consecutive training days streak."
+        },
+        "caloriesConsumed": {
+          "type": "number",
+          "description": "Total daily kilocalories logged."
+        },
+        "proteinGrams": {
+          "type": "number",
+          "description": "Daily protein intake in grams."
+        },
+        "carbsGrams": {
+          "type": "number",
+          "description": "Daily carbohydrate intake in grams."
+        },
+        "fatsGrams": {
+          "type": "number",
+          "description": "Daily dietary fat intake in grams."
+        },
+        "waterGlasses": {
+          "type": "number",
+          "description": "Daily hydration count in 250ml glasses."
+        },
+        "stepsCount": {
+          "type": "number",
+          "description": "Daily step count."
+        },
+        "mindfulnessStreak": {
+          "type": "number",
+          "description": "Consecutive daily mindfulness days."
+        },
+        "breathworkSessions": {
+          "type": "number",
+          "description": "Completed 4-7-8 breathwork sessions."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": [
+        "ownerId",
+        "workoutCompleted",
+        "completedExercisesCount",
+        "workoutStreak",
+        "caloriesConsumed",
+        "proteinGrams",
+        "carbsGrams",
+        "fatsGrams",
+        "waterGlasses",
+        "stepsCount",
+        "mindfulnessStreak",
+        "breathworkSessions",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "DomainSetting": {
+      "title": "DomainSetting",
+      "description": "Global domain whitelist configuration managed by HB+ admins.",
+      "type": "object",
+      "properties": {
+        "updatedByUid": {
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "UID of the admin who updated the domain whitelist."
+        },
+        "allowedDomains": {
+          "type": "array",
+          "description": "Bounded list of allowed email domains (max 10)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server update timestamp."
+        }
+      },
+      "required": ["updatedByUid", "allowedDomains", "createdAt", "updatedAt"]
+    },
+    "AdminRole": {
+      "title": "AdminRole",
+      "description": "Out-of-band admin role registry keyed by user UID.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "UID of granted admin."
+        },
+        "grantedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when admin privilege was provisioned."
+        }
+      },
+      "required": ["uid", "grantedAt"]
+    }
+  },
+  "firestore": {
+    "/profiles/{userId}": {
+      "schema": "Profile",
+      "description": "HB+ user profiles isolated per owner and accessible by verified admins."
+    },
+    "/wellnessLogs/{logId}": {
+      "schema": "WellnessLog",
+      "description": "Personal daily wellness pillar metrics keyed by user UID."
+    },
+    "/domainSettings/{settingId}": {
+      "schema": "DomainSetting",
+      "description": "Organization domain whitelist settings."
+    },
+    "/admins/{adminId}": {
+      "schema": "AdminRole",
+      "description": "Trusted admin lookup documents."
+    }
+  }
+}
