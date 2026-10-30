@@ -10,24 +10,23 @@ A production-ready, cross-platform health, strength, precision nutrition, and au
 
 - **Live Production App:** [https://hbplus-wellness.netlify.app](https://hbplus-wellness.netlify.app)
 - **Auth & Recruiter Sandbox:** [https://hbplus-wellness.netlify.app/login](https://hbplus-wellness.netlify.app/login)
-- **Privacy & OAuth Data Policy:** [https://hbplus-wellness.netlify.app/privacy](https://hbplus-wellness.netlify.app/privacy)
 
 ---
 
 ## Table of Contents
 
-1. [Recruiter 60-Second Evaluation Guide](#1-recruiter-60-second-evaluation-guide)
+1. [Evaluation Guide](#1-evaluation-guide)
 2. [Authentication Flow](#2-authentication-flow)
 3. [How Domain Restriction Works (`@hbplus.fit`)](#3-how-domain-restriction-works-hbplusfit)
 4. [Setup Instructions (Local Web, Mobile & Supabase)](#4-setup-instructions-local-web-mobile--supabase)
 5. [Product Tour & Feature Architecture](#5-product-tour--feature-architecture)
 6. [Database Schema & Row-Level Security (RLS)](#6-database-schema--row-level-security-rls)
-7. [Clean Project Structure](#7-clean-project-structure)
+7. [Project Structure](#7-project-structure)
 8. [Deployment (Netlify)](#8-deployment-netlify)
 
 ---
 
-## 1. Recruiter 60-Second Evaluation Guide
+## 1. Evaluation Guide
 
 You can evaluate every authentication rule, role permission, and telemetry feature immediately at **[https://hbplus-wellness.netlify.app/login](https://hbplus-wellness.netlify.app/login)** in two ways:
 
@@ -256,7 +255,7 @@ Defined in [`supabase/schema.sql`](./supabase/schema.sql):
 
 ---
 
-## 7. Clean Project Structure
+## 7. Project Structure
 
 ```text
 hbplus-wellness-portal/
