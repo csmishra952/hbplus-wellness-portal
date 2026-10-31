@@ -258,9 +258,7 @@ Defined in [`supabase/schema.sql`](./supabase/schema.sql):
 ## 7. Project Structure
 
 ```text
-hbplus-wellness-portal/
-├── public/
-│   └── privacy.html               # Static OAuth privacy disclosure page
+hbplus-wellness-portal/               
 ├── src/
 │   ├── assets/images/             # High-resolution bundled athletic, studio & avatar assets
 │   ├── components/
